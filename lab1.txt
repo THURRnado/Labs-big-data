@@ -1,0 +1,178 @@
+-- Atividade 1:
+
+-- Letra A
+INSERT INTO EMPREGADO VALUES ('943775543', 'Roberto', 'F', 'Silva', 'M', 'Rua X, 22 – Araucária – PR', '1952-06-21',
+'888665555', '1', 58000);
+
+-- Letra B
+INSERT INTO PROJETO VALUES ('4', 'ProdutoA', 'Araucaria', '2'); -- ERROR:  23503: insert or update on table "projeto" violates foreign key constraint "fk_projeto_departamento" (não ocorre por que 2 não existe como pk na table Departamento)
+
+-- Letra C
+INSERT INTO DEPARTAMENTO VALUES ('4', 'Produção', '943775543', '1998-10-01'); -- ERROR:  23505: duplicate key value violates unique constraint "departamento_pkey" (ja existe uma pk=4 na tabela departamento)
+
+-- Letra D
+INSERT INTO TRABALHA VALUES ('677678989', null, 40.0); -- ERROR:  23502: null value in column "pno" of relation "trabalha" violates not-null constraint (coluna especificada nao pode ser vazia por conta da constraint not-null)
+
+-- Letra E
+INSERT INTO DEPENDENTE VALUES ('453453453', 'Joao', 'M', '1970-12-12', 'CONJUGE');
+
+-- Letra F
+DELETE FROM TRABALHA WHERE essn='333445555';
+
+-- Letra G
+DELETE FROM EMPREGADO WHERE ssn='987654321'; -- ERROR:  23503: update or delete on table "empregado" violates foreign key constraint "fk_empregado_empregado" on table "empregado" (nao eh possivel deletar, porque a pk esta sendo referenciada na mesma tabela)
+
+-- Letra H
+DELETE FROM PROJETO WHERE pjnome='ProdutoX'; -- ERROR:  23503: update or delete on table "projeto" violates foreign key constraint "fk_trabalha_projeto" on table "trabalha" (a coluna pnumero ligada a linha esta sendo referenciada pela tabela trabalha)
+
+-- Letra I
+UPDATE DEPARTAMENTO SET gerssn='123456789', gerdatainicio='1999-01-10' WHERE dnumero='5';
+
+-- Letra J
+UPDATE EMPREGADO SET superssn='943775543' WHERE ssn='999887777';
+
+-- Letra L
+UPDATE TRABALHA SET horas=5.0 WHERE essn='999887777' AND pno='10';
+
+
+-- Atividade 2:
+
+-- Letra A
+SELECT essn, nomedep, parentesco FROM DEPENDENTE ORDER BY essn ASC, parentesco DESC;
+
+-- Letra B
+SELECT pnome, endereco FROM EMPREGADO WHERE dno='5';
+
+-- Letra C
+SELECT 
+  pr.pjnome,
+  dep.dnome,
+  emp.pnome,
+  emp.endereco,
+  emp.datanasc
+FROM PROJETO pr
+JOIN DEPARTAMENTO dep 
+  ON pr.dnum = dep.dnumero
+JOIN EMPREGADO emp 
+  ON dep.gerssn = emp.ssn
+WHERE pr.plocal = 'Araucaria';
+
+-- Letra D
+SELECT *
+FROM EMPREGADO emp
+JOIN TRABALHA tr
+  ON emp.ssn = tr.essn
+JOIN PROJETO pr
+  ON tr.pno = pr.pnumero
+WHERE pr.pjnome = 'Automatizacao' AND tr.horas > 10;
+
+-- Letra E
+SELECT pnome, salario
+FROM EMPREGADO
+ORDER BY salario DESC
+LIMIT 3;
+
+-- Letra F
+SELECT DISTINCT
+  sup.pnome,
+  sup.salario*1.20 AS salario_aumentado
+FROM EMPREGADO emp
+JOIN EMPREGADO sup
+  ON emp.superssn = sup.ssn; 
+
+-- Letra G
+SELECT 
+  dep.dnome,
+  loc.dlocalizacao
+FROM DEPARTAMENTO dep
+JOIN LOCALIZACAO loc
+  ON dep.dnumero = loc.dnum;
+
+-- Letra H
+SELECT 
+  dep.dnome,
+  pr.pjnome
+FROM DEPARTAMENTO dep
+JOIN PROJETO pr
+  ON dep.dnumero = pr.dnum;
+
+-- Letra I
+SELECT pnome, datanasc
+FROM EMPREGADO
+WHERE sexo='F' AND salario>3000;
+
+-- Letra J
+SELECT *
+FROM PROJETO pr
+JOIN TRABALHA tr
+  ON pr.pnumero = tr.pno
+JOIN EMPREGADO emp
+  ON tr.essn = emp.ssn
+WHERE emp.pnome = 'Fabio';
+
+
+-- Atividade 3
+
+--Letra A
+SELECT 
+  emp.ssn,
+  emp.pnome,
+  sup.pnome as super_pnome
+FROM EMPREGADO emp
+JOIN EMPREGADO sup
+  ON emp.superssn = sup.ssn
+WHERE emp.dno <> sup.dno;
+
+-- Letra B
+SELECT 
+  emp.ssn,
+  dep.nomedep,
+  dep.parentesco
+FROM EMPREGADO emp
+JOIN DEPENDENTE dep
+  ON emp.ssn = dep.essn
+ORDER BY emp.ssn ASC, dep.parentesco DESC; 
+
+-- Letra C
+SELECT 
+  emp.pnome,
+  sup.pnome as super_pnome
+FROM EMPREGADO emp
+JOIN EMPREGADO sup
+  ON emp.superssn = sup.ssn
+WHERE sup.pnome = 'Joaquim' AND sup.inicialm = 'E' AND sup.unome = 'Brito';
+
+-- Letra D
+SELECT 
+  pr.pnumero,
+  pr.pjnome,
+  emp.pnome
+FROM PROJETO pr
+JOIN TRABALHA tr
+  ON pr.pnumero = tr.pno
+JOIN EMPREGADO emp
+  ON tr.essn = emp.ssn
+WHERE emp.unome = 'Will'; -- Na tabela TRABALHA o ssn de uname=Will nao aparece
+
+-- Letra E
+SELECT
+  emp.pnome
+FROM PROJETO pr
+JOIN TRABALHA tr
+  ON pr.pnumero = tr.pno
+JOIN EMPREGADO emp
+  ON tr.essn = emp.ssn
+WHERE pr.dnum = '5';
+
+-- Letra F
+SELECT
+  emp.pnome,
+  emp.endereco
+FROM PROJETO pr
+JOIN TRABALHA tr
+  ON pr.pnumero = tr.pno
+JOIN EMPREGADO emp
+  ON tr.essn = emp.ssn
+JOIN LOCALIZACAO loc
+  ON pr.dnum = loc.dnum
+WHERE pr.plocal = 'Curitiba' AND loc.dlocalizacao <> 'Curitiba';
