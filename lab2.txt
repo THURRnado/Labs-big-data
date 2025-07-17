@@ -1,0 +1,328 @@
+-- Lab 2
+
+-- Atividade 1:
+
+-- INNER: 
+
+-- Linha 1 da tabela A ia vir junto as linhas 1 a 3 da tabela B
+-- Linha 2 da tabela A ia vir junto as linhas 4 e 5 da tabela B
+-- Linha 3 da tabela A ia vir junto a linha 6 da tabela B
+-- Linha 5 da tabela A ia vir junto a linha 7 da tabela B
+
+-- LEFT:
+
+-- Linha 1 da tabela A ia vir junto as linhas 1 a 3 da tabela B
+-- Linha 2 da tabela A ia vir junto as linhas 4 e 5 da tabela B
+-- Linha 3 da tabela A ia vir junto a linha 6 da tabela B
+-- Linha 4 da tabela A apareceria sem nenhum registro da tabela B
+-- Linha 5 da tabela A ia vir junto a linha 7 da tabela B
+
+-- RIGHT:
+
+-- Linha 1 da tabela A ia vir junto as linhas 1 a 3 da tabela B
+-- Linha 2 da tabela A ia vir junto as linhas 4 e 5 da tabela B
+-- Linha 3 da tabela A ia vir junto a linha 6 da tabela B
+-- Linha 5 da tabela A ia vir junto a linha 7 da tabela B
+-- Apareceriam mais 4 linhas, todas do lado da tabela A vazias e da tabela B preenchidas
+
+-- FULL:
+
+-- Apareceriam todas as linhas das duas tabelas, com as linhas que não tem correpondecia com null na outra tabela
+
+
+-- Atividade 2:
+
+-- Letra A:
+
+SELECT 
+  AVG(salario) AS media_salarial
+FROM empregado
+WHERE sexo = 'F';
+
+-- Letra B:
+
+SELECT 
+  superssn, 
+  COUNT(*) AS num_empregados
+FROM empregado
+WHERE superssn IS NOT NULL
+GROUP BY superssn;
+
+-- Letra C:
+
+SELECT 
+  MAX(horas) AS maior_numero_de_horas
+FROM trabalha;
+
+-- Letra D:
+
+SELECT 
+  pr.pjnome, 
+  SUM(tr.horas) AS horas_gastas
+FROM projeto pr
+JOIN trabalha tr
+  ON tr.pno = pr.pnumero
+GROUP BY pr.pjnome;
+
+-- Letra E:
+
+SELECT 
+  dp.dnome, 
+  AVG(emp.salario) AS media_salario
+FROM projeto pr
+JOIN trabalha tr
+  ON tr.pno = pr.pnumero
+JOIN departamento dp
+  ON pr.dnum = dp.dnumero
+JOIN empregado emp
+  ON emp.ssn = tr.essn
+GROUP BY dp.dnome;
+
+Letra F:
+
+SELECT 
+  emp.ssn,
+  emp.pnome
+FROM empregado emp
+JOIN dependente dep ON emp.ssn = dep.essn
+GROUP BY emp.ssn, emp.pnome
+HAVING COUNT(*) >= 2;
+
+-- Letra G:
+
+SELECT 
+  dp.dnome, 
+  COUNT(*) AS total_projetos
+FROM departamento dp
+JOIN projeto pr 
+  ON dp.dnumero = pr.dnum
+GROUP BY dp.dnome
+ORDER BY total_projetos ASC
+LIMIT 1;
+
+-- Letra H:
+
+SELECT 
+  SUBSTRING(endereco FROM 10 FOR 13) AS trecho_endereco
+FROM empregado;
+
+-- Letra I:
+
+SELECT 
+  EXTRACT(MONTH FROM datanasc) AS mes_nascimento
+FROM empregado;
+
+-- Letra J:
+
+SELECT 
+  emp.pnome,
+  dep.nomedep,
+  EXTRACT(YEAR FROM dep.datanascdep) - EXTRACT(YEAR FROM emp.datanasc) AS idade_quando_nasceu
+FROM empregado emp
+JOIN dependente dep ON emp.ssn = dep.essn
+WHERE LOWER(dep.parentesco) IN ('filho', 'filha');
+
+-- Letra K:
+
+SELECT 
+  EXTRACT(YEAR FROM datanascdep) AS ano_nascimento,
+  COUNT(*) AS num_dependentes
+FROM dependente
+GROUP BY EXTRACT(YEAR FROM datanascdep)
+ORDER BY ano_nascimento;
+
+-- Letra L:
+
+SELECT 
+  sup.pnome,
+  COUNT(emp.ssn) AS num_supervisionados
+FROM empregado emp
+JOIN empregado sup 
+  ON emp.superssn = sup.ssn
+GROUP BY sup.ssn, sup.pnome
+HAVING COUNT(emp.ssn) >= 2;
+
+-- Letra M:
+
+SELECT 
+  pr.pjnome,
+  SUM(emp.salario)
+FROM projeto pr
+JOIN trabalha tr 
+  ON tr.pno = pr.pnumero
+JOIN empregado emp 
+  ON emp.ssn = tr.essn
+GROUP BY pr.pjnome;
+
+
+-- Atividade 3:
+
+-- Letra A:
+
+SELECT 
+  emp.pnome, 
+  emp.unome
+FROM empregado emp
+WHERE EXISTS (
+  SELECT 1
+  FROM dependente dep
+  WHERE dep.essn = emp.ssn
+    AND dep.nomedep = emp.pnome
+    AND dep.sexodep = emp.sexo
+);
+
+-- Letra B:
+
+SELECT 
+  pnome,
+  unome
+FROM empregado
+WHERE salario > (
+  SELECT AVG(salario)
+  FROM empregado
+  WHERE dno = '5'
+);
+
+-- Letra C:
+
+SELECT essn
+FROM trabalha
+WHERE (pno, horas) IN (
+  SELECT pno, horas
+  FROM trabalha
+  WHERE essn = '333445555'
+);
+
+-- Letra D:
+
+SELECT 
+  pnome,
+  unome
+FROM empregado
+WHERE ssn NOT IN (
+  SELECT essn
+  FROM trabalha
+);
+
+-- Letra E:
+
+SELECT 
+  pnome,
+  unome
+FROM empregado
+WHERE ssn NOT IN (
+  SELECT essn
+  FROM dependente
+);
+
+-- Letra F:
+
+SELECT 
+  emp.pnome,
+  emp.unome
+FROM empregado emp
+WHERE emp.ssn IN (
+  SELECT gerssn
+  FROM departamento
+)
+AND emp.ssn NOT IN (
+  SELECT essn
+  FROM dependente
+);
+
+-- Letra G:
+
+SELECT 
+  emp.pnome,
+  emp.unome
+FROM empregado emp
+WHERE emp.ssn IN (
+  SELECT gerssn
+  FROM departamento
+)
+AND emp.ssn IN (
+  SELECT essn
+  FROM dependente
+);
+
+-- Atividade 4:
+
+-- Letra A:
+CREATE VIEW TRABALHA_EM AS
+SELECT 
+  emp.pnome,
+  emp.unome,
+  pr.pjnome,
+  tr.horas
+FROM empregado emp
+JOIN trabalha tr 
+  ON emp.ssn = tr.essn
+JOIN projeto pr 
+  ON pr.pnumero = tr.pno;
+
+-- Teste:
+
+SELECT * 
+FROM TRABALHA_EM;
+
+-- Letra B:
+
+SELECT 
+  pnome,
+  unome
+FROM TRABALHA_EM
+WHERE pjnome = 'ProdutoX';
+
+-- Alteracao:
+
+UPDATE empregado
+SET pnome = 'Carlos'
+WHERE ssn = '123456789';
+
+-- Teste:
+
+SELECT *
+FROM TRABALHA_EM; -- Como se trata de uma view normal a alteração é refletida de imediato, por conta da consulta se tratar de uma abstração de uma outra maior
+
+-- Letra C:
+
+DROP VIEW IF EXISTS TRABALHA_EM;
+
+-- Letra D:
+
+CREATE MATERIALIZED VIEW DEPTO_INFO AS
+SELECT 
+  dep.dnome,
+  COUNT(emp.ssn) AS total_empregados,
+  SUM(emp.salario) AS total_salarios
+FROM departamento dep
+JOIN empregado emp 
+  ON dep.dnumero = emp.dno
+GROUP BY dep.dnome;
+
+-- Teste:
+
+SELECT *
+FROM DEPTO_INFO;
+
+-- Letra E:
+
+SELECT *
+FROM DEPTO_INFO
+ORDER BY total_salarios DESC;
+
+-- Alteracao
+UPDATE empregado
+SET salario = salario + 450
+WHERE dno = '1';
+
+-- Usando refresh
+REFRESH MATERIALIZED VIEW DEPTO_INFO;
+
+-- Letra F:
+
+-- Na view normal, as alterações são mostradas de imediato, enquanto a materialized é preciso atualizar, pois ela fica armazenada
+
+-- Letra G:
+
+DROP MATERIALIZED VIEW IF EXISTS DEPTO_INFO;
