@@ -1,0 +1,10 @@
+Atividade 01:
+
+B-TREE, pois é o melhor para comparação de igualdade numérica
+B-TREE, pois é o melhor para comparação de igualdade numérica
+B-TREE, pois é o melhor para comparação de igualdade numérica
+Nenhum, pois a operação em questão percorre todas as linhas presentes na tabela
+B-TREE, por se tratar de comparação e possuir GROUP BY
+GIN, pois se trata de dados envolvendo JSONB
+B-TREE, pois existe uma comparação temporal
+GIST, pois se trata de uma operação espacial
